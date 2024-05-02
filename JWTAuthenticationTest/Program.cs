@@ -22,6 +22,7 @@ var mappingConfig = new MapperConfiguration(mc =>
 IMapper mapper = mappingConfig.CreateMapper();
 builder.Services.AddSingleton(mapper);
 builder.Services.AddTransient<ILoginService, LoginService>();
+builder.Services.AddTransient<UserService>();
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -36,33 +37,32 @@ var jwtKey = builder.Configuration.GetSection("JWT:Key").Get<string>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtIssuer,
-            ValidAudience = jwtIssuer,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-        };
-    });
+    {      
+options.TokenValidationParameters = new TokenValidationParameters
+{
+  ValidateIssuer = true,
+  ValidateAudience = true,
+  ValidateLifetime = true,
+  ValidateIssuerSigningKey = true,
+  ValidIssuer = jwtIssuer,
+  ValidAudience = jwtIssuer,
+  IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+};
+});
 
 //JWT Authorize start
 builder.Services.AddSwaggerGen(x =>
 {
     x.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPI", Version = "v1" });
-    x.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "Enter like vbnmbgvhj",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
-    });
-    x.AddSecurityRequirement(new OpenApiSecurityRequirement
+x.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+{
+Description = "Enter like vbnmbgvhj",
+Name = "Authorization",
+In = ParameterLocation.Header,
+Type = SecuritySchemeType.ApiKey,
+Scheme = "Bearer",
+});
+x.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
@@ -79,8 +79,8 @@ builder.Services.AddSwaggerGen(x =>
 });
 builder.Services.AddCors(opt =>
 {
-    opt.AddPolicy("CorsPolicy", builder =>
-    builder.AllowAnyOrigin().AllowAnyHeader());
+opt.AddPolicy("CorsPolicy", builder =>
+builder.AllowAnyOrigin().AllowAnyHeader());
 });
 
 

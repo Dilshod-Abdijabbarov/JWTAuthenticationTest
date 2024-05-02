@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JWTAuthenticationTest.Migrations
 {
     [DbContext(typeof(AuthenticationTest))]
-    [Migration("20240501072444_firtsmigrattests")]
-    partial class firtsmigrattests
+    [Migration("20240502102559_newMigration777")]
+    partial class newMigration777
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,7 +24,24 @@ namespace JWTAuthenticationTest.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("JWTAuthenticationTest.Models.UserModel", b =>
+            modelBuilder.Entity("JWTAuthenticationTest.Models.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("JWTAuthenticationTest.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -45,7 +62,7 @@ namespace JWTAuthenticationTest.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Roles")
+                    b.Property<string>("RoleIds")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -55,7 +72,26 @@ namespace JWTAuthenticationTest.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserModels");
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("JWTAuthenticationTest.Models.UserRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RoleUser");
                 });
 #pragma warning restore 612, 618
         }

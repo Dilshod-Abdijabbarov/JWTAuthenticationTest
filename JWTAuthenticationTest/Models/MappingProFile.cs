@@ -6,7 +6,7 @@ namespace JWTAuthenticationTest.Models
     {
         public MappingProFile() 
         {
-            CreateMap<UserModel, UserModelDTO>().ReverseMap();
+            CreateMap<User, UserModelDTO>().ReverseMap();
         }
     }
 }

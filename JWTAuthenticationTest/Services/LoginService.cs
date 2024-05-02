@@ -11,6 +11,7 @@ namespace JWTAuthenticationTest.Services
 {
     public class LoginService : ILoginService
     {
+        private static List<Claim> AuthClaims { get; set; }
         private readonly AuthenticationTest _dbcontext;
         private IConfiguration _configuration;
         private readonly IMapper _mapper;
@@ -23,31 +24,37 @@ namespace JWTAuthenticationTest.Services
 
         public string Token(UserModelDTO user)
         {
-            var userInfo =_dbcontext.UserModels.FirstOrDefault(d => d.Username == user.Username && d.Password == user.Password);
+            var userInfo = _dbcontext.Users.Where(d => d.Username == user.Username).Include(x=> x.Roles).FirstOrDefault();
 
-            if(userInfo != null)
+            var roleInfo = _dbcontext.Roles.Where(s => userInfo.Roles.Select(d=>d.RoleId).Contains(s.Id)).Select(f=>f.Name);
+                   
+            if (userInfo != null)
             {
-                    var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-                    var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-                
-                    var clamis = new[]
-                    {
+                AuthClaims = new List<Claim>
+                {
                       new Claim(ClaimTypes.Name,userInfo.Username),
                       new Claim("Password ",userInfo.Password),
-                      
-                      new Claim(ClaimTypes.Role,userInfo.Roles.FirstOrDefault().ToString())
-                    };
-                    var Sectoken = new JwtSecurityToken(
-                        _configuration["Jwt:Issuer"],
-                        _configuration["Jwt:Issuer"],
-                        clamis,
-                        expires: DateTime.Now.AddMinutes(120),
-                        signingCredentials: credentials
-                        );
-                    var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
+                     // new Claim(ClaimTypes.Role, string.Join(",", roleInfo)),
+                      //new Claim("Roles", string.Join(",", roleInfo))
+                };
 
-                    return token;              
+                foreach (var item in roleInfo)
+                {
+                    AuthClaims.Add(new Claim(ClaimTypes.Role, item));
+                }
+                var Sectoken = new JwtSecurityToken(
+                    _configuration["Jwt:Issuer"],
+                    _configuration["Jwt:Issuer"],
+                    AuthClaims,
+                    expires: DateTime.Now.AddMinutes(120),
+                    signingCredentials: credentials
+                    );
+                var token = new JwtSecurityTokenHandler().WriteToken(Sectoken);
+
+                return token;
             }
             else
             {
@@ -55,7 +62,5 @@ namespace JWTAuthenticationTest.Services
             }
             return string.Empty;
         }
-
-      
     }
 }

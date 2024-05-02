@@ -29,7 +29,6 @@ namespace JWTAuthenticationTest.Controllers
         [HttpPost]
         public IActionResult Login([FromBody] UserModelDTO user)
         {
-
             if (user != null)
             {
                  var entity = _loginService.Token(user);
